@@ -24,9 +24,9 @@
 <div><b>Result:</b> ${result}</div>
 <#if failures??>
     <#list failures as failure>
-    <div id="testHeader"><b>${failure.getTestHeader()?html}</b></div>
-    <div id="message"><a href="#" onclick="showdiv('trace');return false;">${failure.getMessage()!""?html}</a></div>
-    <div id="trace" style="display:none;"><pre>${failure.getTrace()?html}</pre></div>
+    <div id="testHeader${failure_index?html}"><b>${failure.getTestHeader()?html}</b></div>
+    <div id="message${failure_index?html}"><a href="#" onclick="showdiv('trace${failure_index?js_string}');return false;">${failure.getMessage()!"(No message available)"?html}</a></div>
+    <div id="trace${failure_index?html}" style="display:none;"><pre>${failure.getTrace()?html}</pre></div>
     <br/>
     </#list>
 </#if>
