@@ -20,6 +20,8 @@ package org.alfresco.rad.test;
 
 import org.alfresco.rad.SpringContextHolder;
 import org.alfresco.service.ServiceRegistry;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Rule;
 import org.junit.rules.MethodRule;
 import org.junit.runners.model.FrameworkMethod;
@@ -37,6 +39,7 @@ import org.springframework.context.ApplicationContext;
  * @since 3.0
  */
 public abstract class AbstractAlfrescoIT {
+    private static final Log LOGGER = LogFactory.getLog(AbstractAlfrescoIT.class);
     private ApplicationContext applicationContext = null;
     private ServiceRegistry serviceRegistry = null;
 
@@ -48,7 +51,7 @@ public abstract class AbstractAlfrescoIT {
     public MethodRule testAnnouncer = new MethodRule() {
         @Override
         public Statement apply(Statement base, FrameworkMethod method, Object target) {
-            System.out.println("Running " + getClassName() + " Integration Test: " + method.getName() + "()");
+            LOGGER.info("Running " + getClassName() + " Integration Test: " + method.getName() + "()");
             return base;
         }
     };

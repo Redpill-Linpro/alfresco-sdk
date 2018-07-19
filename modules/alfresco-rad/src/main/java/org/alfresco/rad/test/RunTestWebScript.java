@@ -19,6 +19,8 @@
 package org.alfresco.rad.test;
 
 import org.alfresco.error.AlfrescoRuntimeException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Request;
 import org.junit.runner.Result;
@@ -48,9 +50,11 @@ import java.util.Map;
  */
 public class RunTestWebScript extends DeclarativeWebScript {
 
+    private static final Log LOGGER = LogFactory.getLog(RunTestWebScript.class);
+
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-        System.out.println("RunTestWebScript: Start executing ...");
+        LOGGER.info("RunTestWebScript: Start executing ...");
         String result = AlfrescoTestRunner.FAILURE;
         String clazzAndMethod = null;
         String clazz = null;    // Test class
@@ -66,7 +70,7 @@ public class RunTestWebScript extends DeclarativeWebScript {
             // Not found in template var, try parameter, i.e. ?clazz={class%23method}
             clazzAndMethod = req.getParameter("clazz");
         }
-        System.out.println("RunTestWebScript: clazzAndMethod = " + clazzAndMethod);
+        LOGGER.info("RunTestWebScript: clazzAndMethod = " + clazzAndMethod);
 
         // Do we have a test class and method now?
         if (clazzAndMethod == null) {
@@ -77,11 +81,13 @@ public class RunTestWebScript extends DeclarativeWebScript {
             Class c = null;
             // Split class and method on %23 = #
             String[] clazzAndMethodArray = clazzAndMethod.split("#");
-            if (clazzAndMethodArray.length > 1) {
+            if (clazzAndMethodArray.length >= 1) {
                 clazz = clazzAndMethodArray[0];
-                method = clazzAndMethodArray[1];
+                if (clazzAndMethodArray.length > 1) {
+                    method = clazzAndMethodArray[1];
+                }
             }
-            System.out.println("RunTestWebScript: [clazz=" + clazz + "][method=" + method + "]");
+            LOGGER.info("RunTestWebScript: [clazz=" + clazz + "][method=" + method + "]");
 
             try {
                 // Load the Java class that will be run by JUnit
@@ -110,12 +116,7 @@ public class RunTestWebScript extends DeclarativeWebScript {
         //
         // What test did we run
         Map<String, Object> model = new HashMap<String, Object>();
-        if (method == null) {
-            // We don't have a test method...
-            model.put("test", clazzAndMethod);
-        } else {
-            model.put("test", clazzAndMethod + "#" + method);
-        }
+        model.put("test", clazzAndMethod);
         // Overall Alfresco Test runner result
         model.put("result", result);
         // JUnit Runner stats
@@ -130,6 +131,7 @@ public class RunTestWebScript extends DeclarativeWebScript {
             if (null != junitRunnerResult.getFailures()) {
                 for (Failure failure : junitRunnerResult.getFailures()) {
                     try {
+                        LOGGER.info(failure.getException(), failure.getException());
                         throwables.add(AlfrescoTestRunner.serializableToString(failure.getException()));
                     } catch (IOException e) {
                         try {
@@ -146,8 +148,8 @@ public class RunTestWebScript extends DeclarativeWebScript {
             model.put("wasSuccessful", junitRunnerResult.wasSuccessful());
         }
 
-        System.out.println("RunTestWebScript: model = " + model);
-        System.out.println("RunTestWebScript: Stopped executing");
+        LOGGER.trace("RunTestWebScript: model = " + model);
+        LOGGER.info("RunTestWebScript: Stopped executing");
 
         return model;
     }
